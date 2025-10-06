@@ -16,6 +16,18 @@ const isNotAlphaNumeric = (input: string) => !isAlphaNumeric(input);
 const numericRegex = /\d/;
 const isNumeric = (input: string): boolean => numericRegex.test(input);
 
+const isNotReservedWord = (input: string): boolean => {
+  return input.trim() !== "admin";
+};
+
+const tryCeo = (input: string) => (e: string) => {
+  return input === "ceo" ? fu.packRightBox(input) : fu.packLeftBox(e);
+};
+
+const areStringsNotEqual = (username: string) => (password: string) => {
+  return !password.includes(username);
+};
+
 /**********
     Username Validation Logic
 **********/
@@ -33,6 +45,11 @@ export function validateUsername(input: string) {
       isAlphaNumeric,
       "Username must be alphanumeric"
     ),
+    fu.mapRightBoxWithPredicate(
+      isNotReservedWord,
+      "Username must not be a reserved word"
+    ),
+    fu.ifLeftBoxTryThis(tryCeo(input)),
     fu.unpackBox(
       (message) => ({ isValid: false as const, message }),
       () => ({ isValid: true as const })
@@ -43,7 +60,6 @@ export function validateUsername(input: string) {
 /**********
     Password Validation Logic
 **********/
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function validatePassword(input: string, username: string) {
   return pipe(
     input,
@@ -61,6 +77,10 @@ export function validatePassword(input: string, username: string) {
     fu.mapRightBoxWithPredicate(
       isNumeric,
       "Must have numeric characters"
+    ),
+    fu.mapRightBoxWithPredicate(
+      areStringsNotEqual(username),
+      "Password cannot contain username"
     ),
     fu.unpackBox(
       (message) => ({ isValid: false as const, message }),
