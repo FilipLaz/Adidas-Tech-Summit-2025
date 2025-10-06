@@ -8,6 +8,14 @@ const isNotEmpty = (input: string) => {
 const isMinLength = (min: number) => (input: string) =>
   input.length >= min;
 
+const alphanumericregex = /^[a-z0-9]+$/i;
+const isAlphaNumeric = (input: string): boolean =>
+  alphanumericregex.test(input);
+const isNotAlphaNumeric = (input: string) => !isAlphaNumeric(input);
+
+const numericRegex = /\d/;
+const isNumeric = (input: string): boolean => numericRegex.test(input);
+
 /**********
     Username Validation Logic
 **********/
@@ -21,7 +29,10 @@ export function validateUsername(input: string) {
       isMinLength(5),
       `Username must be at least 5 characters`
     ),
-
+    fu.mapRightBoxWithPredicate(
+      isAlphaNumeric,
+      "Username must be alphanumeric"
+    ),
     fu.unpackBox(
       (message) => ({ isValid: false as const, message }),
       () => ({ isValid: true as const })
@@ -42,6 +53,14 @@ export function validatePassword(input: string, username: string) {
     fu.mapRightBoxWithPredicate(
       isMinLength(7),
       `Password must be at least 7 characters`
+    ),
+    fu.mapRightBoxWithPredicate(
+      isNotAlphaNumeric,
+      "Must have special characters"
+    ),
+    fu.mapRightBoxWithPredicate(
+      isNumeric,
+      "Must have numeric characters"
     ),
     fu.unpackBox(
       (message) => ({ isValid: false as const, message }),
