@@ -29,6 +29,21 @@ const areStringsNotEqual = (username: string) => (password: string) => {
 };
 
 /**********
+    Try email functionality
+**********/
+const tryEmail = (input: string) => (originalErr: string) => {
+  return pipe(input, (x: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(x)
+      ? fu.packRightBox(x)
+      : fu.packLeftBox(originalErr);
+  });
+};
+
+const isNotMostCommonPassword = (input: string): boolean =>
+  !["password1!", "123456!", "123456789!"].includes(input);
+
+/**********
     Username Validation Logic
 **********/
 export function validateUsername(input: string) {
@@ -50,6 +65,7 @@ export function validateUsername(input: string) {
       "Username must not be a reserved word"
     ),
     fu.ifLeftBoxTryThis(tryCeo(input)),
+    fu.ifLeftBoxTryThis(tryEmail(input)),
     fu.unpackBox(
       (message) => ({ isValid: false as const, message }),
       () => ({ isValid: true as const })
@@ -81,6 +97,10 @@ export function validatePassword(input: string, username: string) {
     fu.mapRightBoxWithPredicate(
       areStringsNotEqual(username),
       "Password cannot contain username"
+    ),
+    fu.mapRightBoxWithPredicate(
+      isNotMostCommonPassword,
+      "Password cannot be most commonly used"
     ),
     fu.unpackBox(
       (message) => ({ isValid: false as const, message }),
