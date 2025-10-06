@@ -39,6 +39,15 @@ const isAdidasEmail = (
     : fu.packLeftBox("Email must be an adidas.com or adidas.de email");
 };
 
+const isNotBannedEmail = (input: string): boolean =>
+  !["banned@adidas.com"].includes(input);
+
+const tryExternalEmail = (input: string) => (e: string) => {
+  return ["davidb@gmail.com"].includes(input)
+    ? fu.packRightBox(input)
+    : fu.packLeftBox(e);
+};
+
 const tryEmail = (input: string) => (originalErr: string) => {
   return pipe(
     input,
@@ -48,7 +57,12 @@ const tryEmail = (input: string) => (originalErr: string) => {
         ? fu.packRightBox(x)
         : fu.packLeftBox(originalErr);
     },
-    fu.mapRightBoxThatCanFail(isAdidasEmail)
+    fu.mapRightBoxThatCanFail(isAdidasEmail),
+    fu.mapRightBoxWithPredicate(
+      isNotBannedEmail,
+      "Your email is banned."
+    ),
+    fu.ifLeftBoxTryThis(tryExternalEmail(input))
   );
 };
 
