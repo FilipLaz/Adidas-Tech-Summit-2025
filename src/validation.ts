@@ -5,6 +5,9 @@ const isNotEmpty = (input: string) => {
   return input.trim() !== "";
 };
 
+const isMinLength = (min: number) => (input: string) =>
+  input.length >= min;
+
 /**********
     Username Validation Logic
 **********/
@@ -14,6 +17,11 @@ export function validateUsername(input: string) {
     fu.tap("Username passing"), // initial tap
     fu.packBox(isNotEmpty, () => "Username must not be empty"),
     fu.tap("Username after packing"), // after packBox
+    fu.mapRightBoxWithPredicate(
+      isMinLength(5),
+      `Username must be at least 5 characters`
+    ),
+
     fu.unpackBox(
       (message) => ({ isValid: false as const, message }),
       () => ({ isValid: true as const })
@@ -31,6 +39,10 @@ export function validatePassword(input: string, username: string) {
     fu.tap("Password passing"), // initial tap
     fu.packBox(isNotEmpty, () => "Password must not be empty"),
     fu.tap("Password after packing"), // after packBox
+    fu.mapRightBoxWithPredicate(
+      isMinLength(7),
+      `Password must be at least 7 characters`
+    ),
     fu.unpackBox(
       (message) => ({ isValid: false as const, message }),
       () => ({ isValid: true as const })
