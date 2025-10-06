@@ -1,5 +1,5 @@
 import { pipe } from "fp-ts/function";
-import { fu } from "./utils/fu";
+import { fu, type LeftOrRightBox } from "./utils/fu";
 
 const isNotEmpty = (input: string) => {
   return input.trim() !== "";
@@ -31,13 +31,25 @@ const areStringsNotEqual = (username: string) => (password: string) => {
 /**********
     Try email functionality
 **********/
+const isAdidasEmail = (
+  input: string
+): LeftOrRightBox<string, string> => {
+  return input.endsWith("@adidas.com") || input.endsWith("@adidas.de")
+    ? fu.packRightBox(input)
+    : fu.packLeftBox("Email must be an adidas.com or adidas.de email");
+};
+
 const tryEmail = (input: string) => (originalErr: string) => {
-  return pipe(input, (x: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(x)
-      ? fu.packRightBox(x)
-      : fu.packLeftBox(originalErr);
-  });
+  return pipe(
+    input,
+    (x: string) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(x)
+        ? fu.packRightBox(x)
+        : fu.packLeftBox(originalErr);
+    },
+    fu.mapRightBoxThatCanFail(isAdidasEmail)
+  );
 };
 
 const isNotMostCommonPassword = (input: string): boolean =>
